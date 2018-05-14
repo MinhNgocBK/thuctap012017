@@ -2,6 +2,7 @@
 
 
 ## Lý thuyết
+- [Lời nói đầu](docs/Loi-noi-dau.md)
 - [Giới thiệu, các dịch vụ và thành phần](docs/Giới%20thiệu%2C%20các%20dịch%20vụ%20và%20thành%20phần.md)
 - [Nova, Libvirt và KVM](docs/Nova%2C%20Libvirt%20và%20KVM.md)
 - [Quá trình boot một VM trong OpenStack](docs/Quá%20trình%20boot%20một%20VM%20trong%20OpenStack.md)
