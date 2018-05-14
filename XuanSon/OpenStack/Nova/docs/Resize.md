@@ -118,12 +118,12 @@ Trong bài lab này là:
 openstack server resize --flavor small VM1
 ```
 
-- Chờ đến khi VM1 thay đổi trạng thái sang `VERIFY_RESIZE` (dùng `openstack server show` để xem), confirm việc resize :  
+- Chờ đến khi VM1 thay đổi trạng thái sang `VERIFY_RESIZE` (dùng `openstack server show <server>` hoặc `openstack server list` để xem), confirm việc resize :  
 ```
 openstack server resize --confirm VM1
 ```
 
-- Nếu muốn quay trở về sử dụng flavor cũ, sử dụng câu lệnh sau  
+- Nếu chưa thực hiện confirm việc resize mà muốn  muốn quay trở về sử dụng flavor cũ, sử dụng câu lệnh sau  
 ```
 openstack server resize --revert VM1
 ```
@@ -164,15 +164,30 @@ openstack volume set --state in-use <volume-ID>
 openstack server resize --flavor <flavor> <vm-name>
 ```
 
-\- Confirm resize sau khi trạng thái máy ảo chuyển thành “VERIFY_RESIZE” (dùng câu lệnh “`openstack server show`” để xem)  
+\- Confirm resize sau khi trạng thái máy ảo chuyển thành “VERIFY_RESIZE” (dùng `openstack server show <server>` hoặc `openstack server list` để xem):  
 ```
 openstack server resize --confirm <vm-name>
 ```
 
 <a name="3"></a>
-# 3.Chú ý
-\- Tùy chọn `allow_resize_to_same_host` trong file `/etc/nova/nova.conf` trên node Controller mặc định là `False`. Điều này có nghĩa là bạn không thể resize trên cùng một host. Bạn nên chỉnh thành True để có thể resize trên cùng một host.  
-\- Tuy nhiên khi mình đã lab thử, mình để nguyên mặc định đó, thì VM vẫn có thể resize trên cùng 1 host.  
+# 3.Config allow resize on same host
+\- Tùy chọn `allow_resize_to_same_host` ở section `[DEFAULT]` trong file `/etc/nova/nova.conf` trên node Controller mặc định là `False`. Điều này có nghĩa là bạn không thể resize trên cùng một host.  
+\- Nếu muốn resize trên cùng một host, bạn nên chỉnh thành `True` :  
+```
+[DEFAULT]
+allow_resize_to_same_host = True
+```
+
+- Sau đó thực hiện command trên node Controller:  
+```
+systemctl restart nova-api
+systemctl restart nova-scheduler
+```
+
+- Và thực hiện command trên node Compute:  
+```
+systemctl restart nova-compute
+```
 
 
 

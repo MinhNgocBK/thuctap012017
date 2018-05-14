@@ -117,7 +117,7 @@ ovs-vsctl add-port <brname> <ifname> -- set Interface <ifname> ofport=n
 
 Cho versions của Open vSwitch >1.9:  
 ```
-add-port <brname> <ifname> -- set Interface <ifname> ofport_request=n
+ovs-vsctl add-port <brname> <ifname> -- set Interface <ifname> ofport_request=n
 ```
 
 Chú ý: Bạn cũng có thể add port trước rồi chỉ định port number sau:  
