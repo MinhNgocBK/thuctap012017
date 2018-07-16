@@ -102,8 +102,9 @@ sudo apt-get install qemu-kvm
 ```
 
 <a name="6.2"></a>
-## 6.2.Storage pools 
-\- Chúng ta cần tạo pool chứa VM.  
+## 6.2.Storage pools
+\- Chúng ta cần tạo pool chứa file image của VM, và chứa file `.iso` để tạo image.  
+\- Chú ý: image và file `.iso` dùng để tạo image phải được đặt trong pool.  
 \- Defualt pool :  
 ```
 /var/lib/libvirt/images
