@@ -191,10 +191,12 @@ https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Vi
 
 <img src="http://i.imgur.com/jNZnu27.png" />
 
-Mô hình lab bao gồm 2 node(cài đặt dưới dạng máy ảo trên VMWare Workstation)
+\- Mô hình lab bao gồm 2 node(cài đặt dưới dạng máy ảo trên VMWare Workstation)
 - **WebVirtMgr host**: Cài đặt WebVirtMgr
 - **Host Server 1**: Server cài đặt KVM-QEMU để tạo các máy ảo
 - **Host Server 2**: Server cài đặt KVM-QEMU để tạo các máy ảo
+
+\- Tất cả các host đều cài hệ điều hành Centos 7.5.18.04.  
 
 <a name="3.2.2"></a>
 ### 3.2.2.Cài đặt Webvirtmgr (Web panel)
@@ -440,14 +442,16 @@ virsh # exit
 
 <img src="http://i.imgur.com/jNZnu27.png" />
 
-Mô hình lab bao gồm 2 node(cài đặt dưới dạng máy ảo trên VMWare Workstation)
+\- Mô hình lab bao gồm 2 node (cài đặt dưới dạng máy ảo trên VMWare Workstation)
 - **WebVirtMgr host**: Cài đặt WebVirtMgr
 - **Host Server 1**: Server cài đặt KVM-QEMU để tạo các máy ảo
 - **Host Server 2**: Server cài đặt KVM-QEMU để tạo các máy ảo
 
+\- Tất cả các host đều cài hệ điều hành Centos 7.5.18.04.  
+
 <a name="3.3.2"></a>
 ### 3.3.2.Cài đặt Webvirtmgr (Web panel)
-\- **Step 1 : Pre-install**   
+\- **Step 0 : Pre-install**   
 - Thực hiện update và cài đặt một số package cần thiết trước khi cài đặt, thực hiện lệnh:  
 ```
 yum update -y
