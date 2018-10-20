@@ -18,6 +18,10 @@
     - [3.2.1.Mô hình lab](#3.2.1)
     - [3.2.2.Cài đặt Webvirtmgr (Web panel)](#3.2.2)
     - [3.2.3. Cài đặt trên host server 1 và host server 2](#3.2.3)
+  - [3.3.Cài đặt Webvirtmgr on the Centos 7.5.18.04](#3.3)
+    - [3.3.1.Mô hình lab](#3.3.1)
+    - [3.3.2.Cài đặt Webvirtmgr (Web panel)](#3.3.2)
+    - [3.3.3. Cài đặt trên host server 1 và host server 2](#3.3.3)
   - [3.3.Sử dụng Webvirt](#3.3)
 - [4.virt-install](#4)
   - [4.1.Lý thuyết](#4.1)
@@ -25,7 +29,6 @@
     - [4.2.1.Introduction](#4.2.1)
     - [4.2.2.SYNOPSIS](#4.2.2)
     - [4.2.3.Example](#4.2.3)
-
 
 <a name="1"></a>
 # 1.virsh
@@ -430,7 +433,272 @@ virsh # exit
 >Chú ý: virsh là một công cụ quản lý máy ảo tương tự như webvirt, virt-manager, etc. nhưng có giao diện dòng lệnh.
 
 <a name="3.3"></a>
-## 3.3.Sử dụng Webvirt
+## 3.3.Cài đặt Webvirtmgr on the Centos 7.5.18.04
+
+<a name="3.3.1"></a>
+### 3.3.1.Mô hình lab
+
+<img src="http://i.imgur.com/jNZnu27.png" />
+
+Mô hình lab bao gồm 2 node(cài đặt dưới dạng máy ảo trên VMWare Workstation)
+- **WebVirtMgr host**: Cài đặt WebVirtMgr
+- **Host Server 1**: Server cài đặt KVM-QEMU để tạo các máy ảo
+- **Host Server 2**: Server cài đặt KVM-QEMU để tạo các máy ảo
+
+<a name="3.3.2"></a>
+### 3.3.2.Cài đặt Webvirtmgr (Web panel)
+\- **Step 1 : Pre-install**   
+- Thực hiện update và cài đặt một số package cần thiết trước khi cài đặt, thực hiện lệnh:  
+```
+yum update -y
+```
+
+- Stop dịch vụ `firewalld`:  
+```
+systemctl stop firewalld
+systemctl disable firewalld
+```
+
+- Disabled `SELINUX`, truy cập vào file `/etc/selinux/config`, thiết lập `SELINUX` thành `disabled`:  
+```
+# This file controls the state of SELinux on the system.
+# SELINUX= can take one of these three values:
+#     enforcing - SELinux security policy is enforced.
+#     permissive - SELinux prints warnings instead of enforcing.
+#     disabled - No SELinux policy is loaded.
+SELINUX=disabled
+# SELINUXTYPE= can take one of three two values:
+#     targeted - Targeted processes are protected,
+#     minimum - Modification of targeted policy. Only selected processes are protected.
+#     mls - Multi Level Security protection.
+SELINUXTYPE=targeted
+```
+
+Lưu lại và khởi động lại hệ thống Centos.
+
+
+\- **Step 1 : Installation**    
+Run :  
+```
+yum install epel-release
+yum -y install git python-pip libvirt-python libxml2-python python-websockify supervisor nginx
+yum -y install gcc python-devel
+pip install numpy
+```
+
+\- **Step 2 : Install python requirements and setup Django environment**  
+Run :  
+```
+$ git clone git://github.com/retspen/webvirtmgr.git
+$ cd webvirtmgr
+$ sudo pip install -r requirements.txt
+$ ./manage.py syncdb
+$ ./manage.py collectstatic
+```
+
+Enter the user information:  
+
+```
+You just installed Django's auth system, which means you don't have any superusers defined.
+Would you like to create one now? (yes/no): yes (Put: yes)
+Username (Leave blank to use 'admin'): admin (Put: your username or login)
+E-mail address: username@domain.local (Put: your email)
+Password: xxxxxx (Put: your password)
+Password (again): xxxxxx (Put: confirm password)
+Superuser created successfully.
+```
+
+Adding additional superusers :  
+Run :  
+```
+$ ./manage.py createsuperuser
+```
+
+\- **Step 3 : Setup Nginx**  
+If you really know what you are doing, feel free to ignore the warning and continue setting up the redirect with nginx:  
+```
+$ cd ..
+mkdir /var/www/
+$ sudo cp -r webvirtmgr /var/www/         ( CentOS, RedHat, Fedora, Ubuntu )      
+```
+
+Add file `webvirtmgr.conf` in `/etc/nginx/conf.d` :  
+```
+server {
+    listen 80 default_server;
+
+    server_name $hostname;
+    #access_log /var/log/nginx/webvirtmgr_access_log; 
+
+    location /static/ {
+        root /var/www/webvirtmgr/webvirtmgr; # or /srv instead of /var
+        expires max;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-for $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host:$server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 600;
+        proxy_read_timeout 600;
+        proxy_send_timeout 600;
+        client_max_body_size 1024M; # Set higher depending on your needs 
+    }
+}
+```
+
+Open nginx.conf out of `/etc/nginx/nginx.conf`:  
+```
+$ sudo vim /etc/nginx/nginx.conf
+```
+
+Comment the Server Section as it is shown in the example:  
+```
+#    server {
+#        listen       80 default_server;
+#        listen       [::]:80 default_server;
+#        server_name  _;
+#        root         /usr/share/nginx/html;
+#
+        # Load configuration files for the default server block.
+#        include /etc/nginx/default.d/*.conf;
+
+#        location / {
+#        }
+
+#        error_page 404 /404.html;
+#            location = /40x.html {
+#        }
+
+#        error_page 500 502 503 504 /50x.html;
+#            location = /50x.html {
+#        }
+#    }
+```
+
+Restart và enable nginx service:  
+```
+$ sudo systemctl restart nginx
+$ sudo systemctl enable nginx
+```
+
+Automatically start supervisord on Centos 7.5.18.04:    
+- Run :
+```
+$ sudo  chkconfig supervisord on
+```
+
+\- **Step 4 : Setup supervisor**  
+Run: 
+
+```
+$ sudo chown -R nginx:nginx /var/www/webvirtmgr
+```
+
+Tạo file `/etc/supervisord.d/webvirtmgr.ini` với nội dung như sau:  
+
+```
+[program:webvirtmgr]
+command=/usr/bin/python /var/www/webvirtmgr/manage.py run_gunicorn -c /var/www/webvirtmgr/conf/gunicorn.conf.py
+directory=/var/www/webvirtmgr
+autostart=true
+autorestart=true
+logfile=/var/log/supervisor/webvirtmgr.log
+log_stderr=true
+user=nginx
+
+[program:webvirtmgr-console]
+command=/usr/bin/python /var/www/webvirtmgr/console/webvirtmgr-console
+directory=/var/www/webvirtmgr
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/supervisor/webvirtmgr-console.log
+redirect_stderr=true
+user=nginx
+```
+
+Restart supervisor daemon :  
+```
+$ sudo systemctl stop supervisord
+$ sudo systemctl start supervisord
+```
+
+\- **Step 5 : Update**
+
+```
+$ cd /var/www/webvirtmgr
+$ sudo git pull
+$ sudo ./manage.py collectstatic
+$ sudo systemctl restart supervisord
+```
+
+\- **Step 6 : Debug**
+
+If you have error or not run panel (only for DEBUG or DEVELOP):  
+```
+$ ./manage.py runserver 0:8000
+```
+
+Enter in your browser:  
+```
+http://x.x.x.x:8000 (x.x.x.x - your server IP address )
+```
+
+<a name="3.3.3"></a>
+### 3.3.3. Cài đặt trên host server 1 và host server 2
+
+\- Thao tác này thực hiện trên server host. Trước khi cài đặt KVM lên node này, cần kiểm tra xem bộ xử lý của máy có hỗ trợ ảo hóa không (VT-x hoặc AMD-V). Nếu thực hiện lab trên máy thật cần khởi động lại máy này vào BIOS thiết lập chế độ hỗ trợ ảo hóa. Tuy nhiên bài lab này thực hiện trên VMWare nên trước khi cài đặt cần thiết lập cho máy ảo hỗ trợ ảo hóa như sau:  
+
+<img src="http://i.imgur.com/BEqXSBo.png" />
+
+\- Cài đặt KVM :  
+```
+sudo yum install qemu-kvm libvirt bridge-utils
+```
+
+\- Thêm người dùng muốn access thông qua Webvirt vào group `libvirtd`:  
+```
+sudo adduser <user_name> libvirtd
+```
+
+\- Tiến hành cấu hình libvirt:  
+- Mở file `vi /etc/libvirt/libvirtd.conf`. Uncomment và chỉnh sửa lại các dòng với giá trị như dưới đây:  
+```
+listen_tls = 0
+listen_tcp = 1
+listen_addr = "0.0.0.0"
+tcp_port = "16509"
+auth_tcp = "none"
+```
+
+- Mở file `vi /etc/sysconfig/libvirtd`. Chỉnh sửa lại như sau:  
+```
+LIBVIRTD_ARGS="--listen"
+```
+
+- Kiểm tra lại việc cài đặt :  
+```
+[root@webvirt ~]# systemctl restart libvirtd
+[root@webvirt ~]# ps ax | grep libvirtd
+ 2006 ?        Ssl    0:00 /usr/sbin/libvirtd --listen
+ 2104 pts/0    S+     0:00 grep --color=auto libvirtd
+[root@webvirt ~]# ss -antup | grep libvirtd
+tcp    LISTEN     0      128       *:16509                 *:*                   users:(("libvirtd",pid=2006,fd=13))
+[root@webvirt ~]# virsh -c qemu+tcp://127.0.0.1/system
+Welcome to virsh, the virtualization interactive terminal.
+
+Type:  'help' for help with commands
+       'quit' to quit
+
+virsh # quit
+```
+
+>Chú ý: virsh là một công cụ quản lý máy ảo tương tự như webvirt, virt-manager, etc. nhưng có giao diện dòng lệnh.
+
+<a name="3.4"></a>
+## 3.4.Sử dụng Webvirt
 \- Note 1 : Nếu quên password , ta truy cập vào thư mục `/var/www/webvirtmgr`, dùng câu lệnh :  
 ```
 ./manage.py changepassword <user_name>
