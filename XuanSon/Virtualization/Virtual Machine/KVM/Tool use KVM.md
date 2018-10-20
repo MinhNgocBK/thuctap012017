@@ -196,7 +196,7 @@ https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Vi
 - **Host Server 1**: Server cài đặt KVM-QEMU để tạo các máy ảo
 - **Host Server 2**: Server cài đặt KVM-QEMU để tạo các máy ảo
 
-\- Tất cả các host đều cài hệ điều hành Centos 7.5.18.04.  
+\- Tất cả các host đều cài hệ điều hành Ubuntu 16.04.  
 
 <a name="3.2.2"></a>
 ### 3.2.2.Cài đặt Webvirtmgr (Web panel)
