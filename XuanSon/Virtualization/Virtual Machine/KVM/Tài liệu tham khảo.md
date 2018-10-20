@@ -23,6 +23,7 @@ http://www.innervoice.in/blogs/2014/03/10/kvm-and-qemu/
     - Create VM : https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Virtualization_Host_Configuration_and_Guest_Installation_Guide/chap-Virtualization_Host_Configuration_and_Guest_Installation_Guide-Guest_Installation_Virt_Manager-Creating_guests_with_virt_manager.html   
   - Webvirt : https://www.webvirtmgr.net/  
     - Cài đặt trên Webvirtmgr host : https://github.com/retspen/webvirtmgr/wiki/Install-WebVirtMgr  
+    http://techies-world.com/how-to-install-webvirtmanager-in-centos/  
     - Cài đặt trên host server : 
    https://github.com/thaihust/Thuc-tap-thang-03-2016/blob/master/ThaiPH/KVM/ThaiPH_WebVirt_lab.md#web    
    https://github.com/retspen/webvirtmgr/wiki/Setup-Host-Server  

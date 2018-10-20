@@ -660,7 +660,7 @@ sudo yum install qemu-kvm libvirt bridge-utils
 
 \- Thêm người dùng muốn access thông qua Webvirt vào group `libvirtd`:  
 ```
-sudo adduser <user_name> libvirtd
+sudo usermod -aG libvirt <user_name>
 ```
 
 \- Tiến hành cấu hình libvirt:  
